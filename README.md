@@ -30,14 +30,6 @@ Perfekt for deg som vil automatisere oversikten over lokale filmvisninger – en
    ```bash
    kulturpotten.py
 
-🛠 Teknologi
-Python 🐍
-
-BeautifulSoup
-
-Requests
-
-
 
 📌 TODO
 
