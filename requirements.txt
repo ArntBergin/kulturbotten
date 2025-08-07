@@ -3,3 +3,5 @@ requests>=2.31.0
 playwright
 datetime
 fastapi[standard]
+sqlalchemy
+uuid

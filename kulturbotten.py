@@ -4,22 +4,26 @@ import time
 import sqlite3
 import os
 import re
+import uuid
 
 os.makedirs("screenshots", exist_ok=True)
 
 conn = sqlite3.connect('culture.db') 
 c = conn.cursor()
 
-c.execute('''CREATE TABLE IF NOT EXISTS movies(
+
+c.execute('''
+CREATE TABLE IF NOT EXISTS movies (
+    guid TEXT PRIMARY KEY,
     day TEXT,
     title TEXT,
     start_time TEXT,
     length TEXT,
     screen TEXT,
-    filename TEXT,
-    UNIQUE(day, title, start_time)
+    filename TEXT
 )
 ''')
+
 
 
 
@@ -29,7 +33,9 @@ def parse_day_with_playwright(page, day):
     print(f" [{day}] fant {len(events)} event(s)")
 
     for i, item in enumerate(events):
+
         try:
+            guid = str(uuid.uuid4())
             title = item.locator("div.event-details a h2").first.inner_text()
             start_time = item.locator("div.ticket-time").first.inner_text()
             length = item.locator("div.event-properties").first.inner_text()
@@ -71,8 +77,11 @@ def parse_day_with_playwright(page, day):
 
 
 
-        print(f" Visning {i+1}: {day}, {title}, {start_time}, {length}, {screen}")
-        c.execute('''INSERT INTO movies VALUES(?,?,?,?,?,?)''', ((day), (title), (start_time), (length), (screen), (filename)))
+        print(f" Visning {i+1}: {guid}, {day}, {title}, {start_time}, {length}, {screen}, {filename}")
+        c.execute('''
+            INSERT INTO movies (guid, day, title, start_time, length, screen, filename)
+            VALUES (?, ?, ?, ?, ?, ?, ?)''', (guid, day, title, start_time, length, screen, filename))
+        conn.commit()
 
 
 
