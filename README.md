@@ -28,8 +28,7 @@ Perfekt for deg som vil automatisere oversikten over lokale filmvisninger – en
 
 3. Hente ut filminfo
    ```bash
-   kulturpotten.py
-
+   kulturbotten.py
 
 📌 TODO
 
