@@ -37,8 +37,10 @@ BeautifulSoup
 
 Requests
 
-(Planlagt: SQLite eller annen lagring)
+
 
 📌 TODO
-[ ] Legge til lagring i database
+
 [ ] API-endepunkt for å hente data
+
+[ ] Integrasjon mot home-assistant
