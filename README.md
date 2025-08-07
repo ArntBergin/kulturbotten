@@ -24,13 +24,12 @@ Perfekt for deg som vil automatisere oversikten over lokale filmvisninger – en
 2. Installer avhengigheter:
 
    ```bash
-pip install -r requirements.txt
+   pip install -r requirements.txt
 
 3. Hente ut filminfo
    ```bash
    kulturpotten.py
 
-   
 🛠 Teknologi
 Python 🐍
 
