@@ -21,15 +21,16 @@ Perfekt for deg som vil automatisere oversikten over lokale filmvisninger – en
    git clone https://github.com/ArntBergin/kulturbotten.git
    cd kulturbotten
    
-Installer avhengigheter:
+2. Installer avhengigheter:
 
-bash
+   ```bash
 pip install -r requirements.txt
-Bruk
-Kjør main.py for å hente kinodata:
 
-bash
-python main.py
+3. Hente ut filminfo
+   ```bash
+   kulturpotten.py
+
+   
 🛠 Teknologi
 Python 🐍
 
