@@ -1,4 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.git/
+tests/
+*.log
 culture.db
 posters/*
-.venv
-__pycache__

@@ -6,3 +6,5 @@ __pycache__/
 .git/
 tests/
 *.log
+culture.db
+posters/*
