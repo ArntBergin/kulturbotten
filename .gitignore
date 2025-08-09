@@ -1,2 +1,4 @@
 culture.db
 posters/*
+.venv
+__pycache__
