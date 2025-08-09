@@ -4,28 +4,58 @@ import time
 import sqlite3
 import os
 import re
+from datetime import datetime, date
 import uuid
+
+
+
 
 os.makedirs("screenshots", exist_ok=True)
 
 conn = sqlite3.connect('culture.db') 
 c = conn.cursor()
+imdb = ""
 
-
-c.execute('''
-CREATE TABLE IF NOT EXISTS movies (
+c.execute('''CREATE TABLE IF NOT EXISTS movies(
     guid TEXT PRIMARY KEY,
-    day TEXT,
-    title TEXT,
+    date TEXT,
     start_time TEXT,
+    title TEXT,
+    age TEXT,      
+    info TEXT,
     length TEXT,
     screen TEXT,
     filename TEXT
+    imdb TEXT
 )
 ''')
 
 
+def parse_norsk_dato(date_str: str) -> date:
+    months = {
+        "januar": 1, "februar": 2, "mars": 3, "april": 4,
+        "mai": 5, "juni": 6, "juli": 7, "august": 8,
+        "september": 9, "oktober": 10, "november": 11, "desember": 12
+    }
 
+
+    parts = date_str.strip().split()
+    if len(parts) < 3:
+        raise ValueError(f"Unexpected date format: {date_str}")
+
+    day_num = int(parts[1].replace(".", ""))
+    month_name = parts[2].lower()
+    if month_name not in months:
+        raise ValueError(f"Unknown month: {month_name}")
+
+    month = months[month_name]
+    now = datetime.now()
+    year = now.year
+
+    if now.month == 12 and month in (1, 2):
+        year += 1
+
+    return date(year, month, day_num)
 
 
 def parse_day_with_playwright(page, day):
@@ -33,13 +63,36 @@ def parse_day_with_playwright(page, day):
     print(f" [{day}] fant {len(events)} event(s)")
 
     for i, item in enumerate(events):
-
         try:
             guid = str(uuid.uuid4())
             title = item.locator("div.event-details a h2").first.inner_text()
+            date = parse_norsk_dato(day)  
             start_time = item.locator("div.ticket-time").first.inner_text()
-            length = item.locator("div.event-properties").first.inner_text()
-            screen = item.locator("div.ticket-title").first.inner_text()
+
+            length_scraped = item.locator("div.event-properties").first.inner_text()           
+            parts = [p.strip() for p in length_scraped.split("|")]
+
+            parts = [p.strip() for p in length_scraped.split("|")]
+
+            # Initialiser alle felter
+            age = info = length = ""
+
+            if len(parts) == 1:
+                age = parts[0]
+            elif len(parts) == 2:
+                age, length = parts
+            elif len(parts) == 3:
+                age, info, length = parts
+            else:
+                print(f"Uventet format i event-properties: {length}")
+
+
+
+
+            screen_scrape = item.locator("div.ticket-title").first.inner_text()
+            screen = [s.strip() for s in screen_scrape.split("|")]
+
+
 
             #### poster
             poster_element = item.locator("a.event-poster").first
@@ -69,20 +122,15 @@ def parse_day_with_playwright(page, day):
             else:
                 print(f"Fant ikke bilde-URL for {title}")
 
-                
 
+
+                
+            print(f" Visning {i+1}: {guid}, {date}, {start_time}, {title}, {age} {length}, {screen[1]}, {filename}, {imdb}")
+            c.execute('''INSERT INTO  movies VALUES(?,?,?,?,?,?,?,?,?,?)''', ((guid), (date), (start_time), (title), (age), (info), (length), (screen[1]), (filename), (imdb)))
+            conn.commit()
      
         except Exception as e:
             print(f" Feil ved parsing av visning {i+1}: {e}")            
-
-
-
-        print(f" Visning {i+1}: {guid}, {day}, {title}, {start_time}, {length}, {screen}, {filename}")
-        c.execute('''
-            INSERT INTO movies (guid, day, title, start_time, length, screen, filename)
-            VALUES (?, ?, ?, ?, ?, ?, ?)''', (guid, day, title, start_time, length, screen, filename))
-        conn.commit()
-
 
 
 def main():
@@ -160,4 +208,12 @@ def main():
         browser.close()
     conn.commit()
     conn.close()  
+
+
+
+
+
+
+
 main()
+
