@@ -8,6 +8,6 @@ spec:
     app: kulturbotten
   ports:
     - protocol: TCP
-      port: 8000
+      port: {{ .Values.service.port }}
       targetPort: 8000
-  type: LoadBalancer
+  type: {{ .Values.service.type }}

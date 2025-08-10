@@ -4,7 +4,7 @@ metadata:
   name: kulturbotten
   namespace: kulturbotten
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: kulturbotten
@@ -15,6 +15,7 @@ spec:
     spec:
       containers:
       - name: kulturbotten
-        image: ghcr.io/arntbergin/kulturbotten:0.3
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: 8000
