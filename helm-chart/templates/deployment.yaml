@@ -13,9 +13,11 @@ spec:
       labels:
         app: kulturbotten
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
-      - name: kulturbotten
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - containerPort: 8000
+        - name: kulturbotten
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000

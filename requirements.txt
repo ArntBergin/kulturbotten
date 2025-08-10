@@ -1,9 +1,25 @@
 beautifulsoup4>=4.12.2
 requests>=2.31.0
 playwright
+datetime
 fastapi[standard]
 sqlalchemy
-sqlmodel
-python-jose[cryptography]
-passlib[bcrypt]
-uvicorn
+uuid
+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 rw
+
+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 publish
+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 pull
+
+docker build \
+--tag dhcr.io/arntbergin/kulturbotten:latest \
+--tag dhcr.io/arntbergin/kulturbotten:0.1 \
+.
+docker build -t ghcr.io/arntbergin/kulturbotten:latest .
+docker push ghcr.io/arntbergin/kulturbotten:latest
+
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username=arntbergin \
+  --docker-password=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 \
+  --docker-email=you@example.com \
+  --namespace=kulturbotten
