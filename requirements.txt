@@ -5,5 +5,3 @@ datetime
 fastapi[standard]
 sqlalchemy
 uuid
-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 rw
-
