@@ -16,6 +16,7 @@ spec:
       containers:
         - name: kulturbotten
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          tag: {{ .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 8000
