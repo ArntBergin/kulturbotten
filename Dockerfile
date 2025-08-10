@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/playwright/python:v1.47.0-jammy
 
-LABEL org.opencontainers.image.source=https://github.com/ArntBergin/kulturbotten
+LABEL org.opencontainers.image.source="https://github.com/ArntBergin/kulturbotten"
 
 WORKDIR /app
 COPY . .
