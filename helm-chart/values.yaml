@@ -4,6 +4,11 @@ image:
   repository: ghcr.io/arntbergin/kulturbotten
   pullPolicy: IfNotPresent
 
+env:
+  SECRET_KEY: "your_secret_key"
+  ADMIN_USERNAME: "your_admin_user"
+  ADMIN_PASSWORD: "your_admin_password"
+
 service:
   type: LoadBalancer
   port: 8000

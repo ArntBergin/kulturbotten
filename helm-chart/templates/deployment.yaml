@@ -19,3 +19,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 8000
+          env:
+            - name: SECRET_KEY
+              value: {{ .Values.env.SECRET_KEY | quote }}
+            - name: ADMIN_USERNAME
+              value: {{ .Values.env.ADMIN_USERNAME | quote }}
+            - name: ADMIN_PASSWORD
+              value: {{ .Values.env.ADMIN_PASSWORD | quote }}
