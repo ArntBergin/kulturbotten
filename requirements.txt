@@ -5,3 +5,4 @@ datetime
 fastapi[standard]
 sqlalchemy
 uuid
+sqlmodel
