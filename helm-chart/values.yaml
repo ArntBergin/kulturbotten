@@ -14,5 +14,9 @@ service:
   port: 8000
 
 ingress:
-  enabled: true
+  enabled: false
   host: kulturbot.bergin.no
+  
+persistence:
+  enabled: true
+  existingClaim: sqlite-pvc

@@ -26,3 +26,12 @@ spec:
               value: {{ .Values.env.ADMIN_USERNAME | quote }}
             - name: ADMIN_PASSWORD
               value: {{ .Values.env.ADMIN_PASSWORD | quote }}
+            - name: DATABASE_URL
+              value: {{ .Values.env.DATABASE_URL | quote }}
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /app/data
+      volumes:
+        - name: sqlite-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
