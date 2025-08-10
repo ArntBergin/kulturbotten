@@ -25,7 +25,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS movies(
     info TEXT,
     length TEXT,
     screen TEXT,
-    filename TEXT
+    filename TEXT,
     imdb TEXT
 )
 ''')
@@ -125,7 +125,7 @@ def parse_day_with_playwright(page, day):
 
 
                 
-            print(f" Visning {i+1}: {guid}, {date}, {start_time}, {title}, {age} {length}, {screen[1]}, {filename}, {imdb}")
+            print(f" Visning {i+1}: {guid}, {date}, {start_time}, {title}, {age}, {info}, {length}, {screen[1]}, {filename}, {imdb}")
             c.execute('''INSERT INTO  movies VALUES(?,?,?,?,?,?,?,?,?,?)''', ((guid), (date), (start_time), (title), (age), (info), (length), (screen[1]), (filename), (imdb)))
             conn.commit()
      

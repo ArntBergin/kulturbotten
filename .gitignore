@@ -8,3 +8,4 @@ tests/
 *.log
 culture.db
 posters/*
+.env

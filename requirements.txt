@@ -1,8 +1,9 @@
 beautifulsoup4>=4.12.2
 requests>=2.31.0
 playwright
-datetime
 fastapi[standard]
 sqlalchemy
-uuid
 sqlmodel
+python-jose[cryptography]
+passlib[bcrypt]
+uvicorn
