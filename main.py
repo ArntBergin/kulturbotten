@@ -25,11 +25,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# === DATABASE ===
-sqlite_file_name = "culture.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args)
+# === DATABASE (PostgreSQL) ===
+# Sett miljøvariabel DATABASE_URL, f.eks.:
+# export DATABASE_URL="postgresql+psycopg2://user:password@localhost:5432/dbname"
+pg_url = os.getenv("DATABASE_URL")
+if not pg_url:
+    raise RuntimeError("DATABASE_URL må settes")
+engine = create_engine(pg_url, echo=True)
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -110,7 +112,6 @@ def register_user(
     password: str,
     session: Annotated[Session, Depends(get_session)],
     full_name: Optional[str] = None
-
 ):
     existing_user = session.exec(select(User).where(User.username == username)).first()
     if existing_user:
@@ -144,7 +145,6 @@ def read_movies(
 ) -> list[Movies]:
     movies = session.exec(select(Movies).offset(offset).limit(limit)).all()
     return list(movies)
-
 
 @app.post("/run-kulturbotten/")
 def run_scraper(
