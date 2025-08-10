@@ -24,8 +24,10 @@ jobs:
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION_TAG="${GITHUB_REF#refs/tags/}"
+          elif [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+            VERSION_TAG="${GITHUB_REF#refs/heads/}"
           else
-            VERSION_TAG="main"
+            VERSION_TAG="unknown"
           fi
           echo "tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
 
