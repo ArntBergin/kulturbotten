@@ -35,3 +35,39 @@ Perfekt for deg som vil automatisere oversikten over lokale filmvisninger – en
 [ ] API-endepunkt for å hente data
 
 [ ] Integrasjon mot home-assistant
+
+
+
+🚀 Installere Kulturbotten via Rancher
+Kulturbotten er tilgjengelig som en Helm-app direkte fra GitHub-repoet ditt. Følg disse stegene for å installere den i K3s via Rancher:
+
+🔹 Forutsetninger
+Du har lagt til GitHub-repoet som Helm App Repository i Rancher:
+
+https://github.com/ArntBergin/kulturbotten
+Du har en aktiv Nginx Ingress Controller (f.eks. Nginx Proxy Manager)
+
+🧭 Steg-for-steg installasjon
+Gå til Rancher Dashboard
+
+Naviger til Apps → Charts
+
+Finn kulturbotten i listen
+
+Klikk Install
+
+Fyll inn:
+
+Namespace: kulturbotten (opprettes automatisk hvis den ikke finnes)
+
+Image tag: 0.3
+
+Ingress host: kulturbot.bergin.no
+
+Klikk Install
+
+🌐 Resultat
+Etter installasjon vil APIet være tilgjengelig på:
+
+https://kulturbot.bergin.no
+Nginx Proxy Manager håndterer SSL og routing automatisk.
