@@ -13,7 +13,12 @@ import subprocess
 logging.basicConfig(level=logging.INFO)
 
 # === KONFIG ===
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-key")
+admin_username = os.getenv("ADMIN_USERNAME")
+admin_password = os.getenv("ADMIN_PASSWORD")
+raw_key = os.getenv("SECRET_KEY")
+if raw_key is None:
+    raise RuntimeError("SECRET_KEY må settes som miljøvariabel")
+SECRET_KEY: str = raw_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -93,11 +98,12 @@ app = FastAPI(title="Kulturbotten API")
 def on_startup():
     create_db_and_tables()
     with Session(engine) as session:
-        if not session.exec(select(User).where(User.username == "admin")).first():
-            hashed_pw = get_password_hash("admin123")
-            admin_user = User(username="admin", hashed_password=hashed_pw, full_name="Administrator")
-            session.add(admin_user)
-            session.commit()
+        if admin_username and admin_password:
+            if not session.exec(select(User).where(User.username == admin_username)).first():
+                hashed_pw = get_password_hash(admin_password)
+                admin_user = User(username=admin_username, hashed_password=hashed_pw, full_name="Administrator")
+                session.add(admin_user)
+                session.commit()
 
 def register_user(
     username: str,
