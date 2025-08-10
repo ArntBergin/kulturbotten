@@ -2,7 +2,6 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/arntbergin/kulturbotten
-  tag: "0.4"
   pullPolicy: IfNotPresent
 
 service:
