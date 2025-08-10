@@ -26,8 +26,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # === DATABASE (PostgreSQL) ===
-# Sett miljøvariabel DATABASE_URL, f.eks.:
-# export DATABASE_URL="postgresql+psycopg2://user:password@localhost:5432/dbname"
+
 pg_url = os.getenv("DATABASE_URL")
 if not pg_url:
     raise RuntimeError("DATABASE_URL må settes")
