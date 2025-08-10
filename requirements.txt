@@ -6,3 +6,5 @@ fastapi[standard]
 sqlalchemy
 uuid
 sqlmodel
+jose
+passlib.context
