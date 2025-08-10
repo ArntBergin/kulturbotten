@@ -13,8 +13,10 @@ spec:
       labels:
         app: kulturbotten
     spec:
+      {{- if .Values.image.private }}
       imagePullSecrets:
         - name: ghcr-secret
+      {{- end }}
       containers:
         - name: kulturbotten
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
