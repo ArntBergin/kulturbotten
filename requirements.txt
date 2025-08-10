@@ -7,4 +7,4 @@ sqlalchemy
 uuid
 sqlmodel
 jose
-passlib.context
+passlib
