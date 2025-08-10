@@ -4,7 +4,6 @@ image:
   repository: ghcr.io/arntbergin/kulturbotten
   tag: "0.3"
   pullPolicy: IfNotPresent
-  private: True
 
 service:
   type: LoadBalancer
