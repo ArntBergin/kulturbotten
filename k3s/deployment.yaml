@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kulturbotten
+  namespace: kulturbotten
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kulturbotten
+  template:
+    metadata:
+      labels:
+        app: kulturbotten
+    spec:
+      containers:
+      - name: kulturbotten
+        image: ghcr.io/arntbergin/kulturbotten:0.3
+        ports:
+        - containerPort: 8000
