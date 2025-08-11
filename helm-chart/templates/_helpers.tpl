@@ -23,7 +23,7 @@ Common labels
 {{- define "kulturbotten.labels" -}}
 app.kubernetes.io/name: {{ include "kulturbotten.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | default "dev" }}
+app.kubernetes.io/version: "{{ .Chart.AppVersion | default "dev" }}"
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "kulturbotten.chart" . }}
 {{- end }}
