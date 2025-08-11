@@ -2,6 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/arntbergin/kulturbotten
+  tag: latest           
   pullPolicy: IfNotPresent
 
 env:
@@ -18,11 +19,6 @@ ingress:
   enabled: false
   host: kulturbot.bergin.no
   
-persistence:
-  enabled: true
-  existingClaim: sqlite-pvc
-
-
 cronjob:
   enabled: true
   schedule: "0 3 * * *"

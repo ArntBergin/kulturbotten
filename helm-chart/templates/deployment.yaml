@@ -1,21 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kulturbotten
-  namespace: kulturbotten
+  name: {{ include "kulturbotten.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kulturbotten.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: kulturbotten
+      app: {{ include "kulturbotten.name" . }}
   template:
     metadata:
       labels:
-        app: kulturbotten
+        app: {{ include "kulturbotten.name" . }}
     spec:
       containers:
         - name: kulturbotten
-          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 8000
@@ -28,10 +30,3 @@ spec:
               value: {{ .Values.env.ADMIN_PASSWORD | quote }}
             - name: DATABASE_URL
               value: {{ .Values.env.DATABASE_URL | quote }}
-          volumeMounts:
-            - name: sqlite-data
-              mountPath: /app/data
-      volumes:
-        - name: sqlite-data
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim }}
