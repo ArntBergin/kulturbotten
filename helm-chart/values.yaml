@@ -8,7 +8,7 @@ env:
   SECRET_KEY: "your_secret_key"
   ADMIN_USERNAME: "your_admin_user"
   ADMIN_PASSWORD: "your_admin_password"
-  DATABASE_URL: "postgresql+psycopg2://user:password@dns_ip5432/kulturbot"
+  DATABASE_URL: "postgresql+psycopg2://user:password@dns_ip:5432/kulturbot"
 
 service:
   type: LoadBalancer
@@ -21,3 +21,14 @@ ingress:
 persistence:
   enabled: true
   existingClaim: sqlite-pvc
+
+
+cronjob:
+  enabled: true
+  schedule: "0 3 * * *"
+  image:
+    repository: ghcr.io/arntbergin/kulturbotten
+    tag: latest
+    pullPolicy: IfNotPresent
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

@@ -1,0 +1,28 @@
+{{- if .Values.cronjob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kulturbotten.fullname" . }}-scraper
+  labels:
+    {{- include "kulturbotten.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "kulturbotten.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: kulturbotten-scraper
+              image: "{{ .Values.cronjob.image.repository }}:{{ .Values.cronjob.image.tag }}"
+              imagePullPolicy: {{ .Values.cronjob.image.pullPolicy }}
+              command: ["python", "kulturbotten.py"]
+              env:
+                - name: DATABASE_URL
+                  value: {{ .Values.env.DATABASE_URL | quote }}
+{{- end }}

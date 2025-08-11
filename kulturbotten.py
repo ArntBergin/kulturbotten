@@ -4,7 +4,6 @@ import os
 import uuid
 import re
 from playwright.sync_api import sync_playwright
-from bs4 import BeautifulSoup
 import time
 
 # === Database URL fra miljøvariabel ===
@@ -92,6 +91,7 @@ def parse_day_with_playwright(session: Session, page, day):
                 filename=filename or "",
                 imdb=imdb
             )
+            print("Klargjør for lagring:", movie.dict())
             session.add(movie)
             session.commit()
             print(f" Lagret movie: {title}")
@@ -122,23 +122,16 @@ def main():
                     print("Ingen nye dager – stopper")
                     break
 
-                seen_days.update(dagens_datoer)
+                
 
                 for dag in dager:
                     day = dag.inner_text().strip().replace("\n", " ")
                     if day not in seen_days:
                         try:
                             dag.click()
-                            page.wait_for_selector(".events", state="attached", timeout=5000)
-                            for _ in range(10):
-                                if page.locator(".events").count() > 0:
-                                    break
-                                time.sleep(0.5)
-                            else:
-                                print("Timeout – fant ingen events")
-                                continue
+                            ...
                             parse_day_with_playwright(session, page, day)
-                            seen_days.add(day)
+                            seen_days.add(day)  # ← Flytt hit
                         except Exception as e:
                             print(f"Klarte ikke klikke: {e}")
 
