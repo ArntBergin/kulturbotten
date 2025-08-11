@@ -5,7 +5,6 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 import os
 import logging
 
-
 # === LOGGING ===
 logging.basicConfig(level=logging.INFO)
 
