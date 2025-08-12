@@ -77,7 +77,7 @@ def parse_day_with_playwright(session: Session, page, day):
 
                 # Lag trygt filnavn med kun gyldige tegn
                 safe_title = "".join(c if c.isalnum() else "_" for c in title.strip())
-                filename = f"posters/{safe_title}.jpg"
+                filename = f"/app/posters/{safe_title}.jpg"
 
                 # Last ned med Playwright
                 if not os.path.exists(filename):
