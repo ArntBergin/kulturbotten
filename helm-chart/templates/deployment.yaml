@@ -15,6 +15,10 @@ spec:
       labels:
         app: {{ include "kulturbotten.name" . }}
     spec:
+      volumes:
+        - name: posters-storage
+          persistentVolumeClaim:
+            claimName: {{ include "kulturbotten.fullname" . }}-posters
       containers:
         - name: kulturbotten
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
@@ -30,3 +34,6 @@ spec:
               value: {{ .Values.env.ADMIN_PASSWORD | quote }}
             - name: DATABASE_URL
               value: {{ .Values.env.DATABASE_URL | quote }}
+          volumeMounts:
+            - name: posters-storage
+              mountPath: {{ .Values.persistence.mountPath }}

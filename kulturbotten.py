@@ -78,7 +78,16 @@ def parse_day_with_playwright(session: Session, page, day):
                 # Lag trygt filnavn med kun gyldige tegn
                 safe_title = "".join(c if c.isalnum() else "_" for c in title.strip())
                 filename = f"posters/{safe_title}.jpg"
-                # Nedlasting av bildet kan implementeres her
+
+                # Last ned med Playwright
+                if not os.path.exists(filename):
+                    image_response = page.request.get(url_start)
+                    with open(filename, "wb") as f:
+                        f.write(image_response.body())
+                    print(f" 📸 Lagret bilde: {filename}")
+                else:
+                    print(f" 🔁 Bilde finnes allerede: {filename}")
+
 
             imdb = ""
 

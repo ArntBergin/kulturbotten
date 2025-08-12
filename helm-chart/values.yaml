@@ -18,7 +18,14 @@ service:
 ingress:
   enabled: false
   host: kulturbot.bergin.no
-  
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  mountPath: /app/posters
+  storageClass: longhorn  # eller den som passer ditt cluster
+
 cronjob:
   enabled: true
   schedule: "0 3 * * *"
