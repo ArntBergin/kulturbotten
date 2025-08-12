@@ -104,7 +104,7 @@ def parse_day_with_playwright(session: Session, page, day):
 def main():
     create_tables()
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.goto("https://namsos.kulturhus.no/kinoprogram/")
         page.wait_for_selector(".calendar-card")
