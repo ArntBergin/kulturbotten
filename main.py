@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import Depends, FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-import os
+
 
 import os
 import logging
