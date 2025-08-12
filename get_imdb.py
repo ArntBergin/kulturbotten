@@ -1,8 +1,16 @@
+from main import get_session, Movies  # hvis du bruker separate filer
+
 import requests
 import datetime
 import json
 
 imdbapi_url = "https://api.imdbapi.dev"
+
+
+# == funksjon som henter alle titler ==
+def get_all_titles(session: Session) -> list[str]:
+    movies = session.exec(select(Movies.title)).all()
+    return movies
 
 def get_first_allowed_title(title):
     url = f"{imdbapi_url}/search/titles?query={title}"

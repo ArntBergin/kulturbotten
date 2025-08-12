@@ -1,9 +1,9 @@
 from sqlmodel import SQLModel, Field, create_engine, Session
 from datetime import date
+from playwright.sync_api import sync_playwright
+
 import os
 import uuid
-import re
-from playwright.sync_api import sync_playwright
 import time
 
 # === Database URL fra miljøvariabel ===
@@ -68,13 +68,15 @@ def parse_day_with_playwright(session: Session, page, day):
             screen = [s.strip() for s in screen_scrape.split("|")]
 
             # Poster/filer håndtering (kan tilpasses)
-            filename = None
-            poster_element = item.locator("a.event-poster").first
-            style = poster_element.get_attribute("style")
-            match = re.search(r'url\("(.*?)"\)', style)
-            if match:
-                image_url = match.group(1).split("?")[0]
-                safe_title = re.sub(r'[^\w\-_.]', '_', title.strip())
+            filename = ""
+            poster = item.locator("a.event-poster").first.get_attribute("style")
+
+            if poster and "url(" in poster:
+                # Hent ut URL mellom 'url("' og '")'
+                url_start = poster.split('url("')[1].split('")')[0].split("?")[0]
+
+                # Lag trygt filnavn med kun gyldige tegn
+                safe_title = "".join(c if c.isalnum() else "_" for c in title.strip())
                 filename = f"posters/{safe_title}.jpg"
                 # Nedlasting av bildet kan implementeres her
 
@@ -102,7 +104,7 @@ def parse_day_with_playwright(session: Session, page, day):
 def main():
     create_tables()
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
         page.goto("https://namsos.kulturhus.no/kinoprogram/")
         page.wait_for_selector(".calendar-card")
@@ -128,7 +130,7 @@ def main():
                     day = dag.inner_text().strip().replace("\n", " ")
                     if day not in seen_days:
                         try:
-                            dag.click()
+                            dag.click(force=True)
                             ...
                             parse_day_with_playwright(session, page, day)
                             seen_days.add(day)  # ← Flytt hit

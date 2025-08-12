@@ -1,5 +1,6 @@
-from typing import Annotated, Optional
+from typing import List, Optional
 from fastapi import Depends, FastAPI, Query
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 import os
@@ -9,14 +10,15 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 # === DATABASE (PostgreSQL) ===
-pg_url = os.getenv("DATABASE_URL")
-if not pg_url:
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL må settes")
-engine = create_engine(pg_url, echo=True)
+engine = create_engine(DATABASE_URL, echo=True)
 
 
 # === MODELLER ===
-class Movies(SQLModel, table=True):
+class MovieRead(SQLModel, table=True):
+    __tablename__ = "movies"  # type: ignore
     guid: Optional[str] = Field(default=None, primary_key=True)
     date: str
     start_time: str
@@ -50,11 +52,15 @@ def on_startup():
 
 
 # === ENDEPUNKTER ===
-@app.get("/movies/")
+
+app.mount("/posters", StaticFiles(directory="posters"), name="posters")
+
+
+@app.get("/movies/", response_model=dict[str, List[MovieRead]])
 def read_movies(
-    session: Annotated[Session, Depends(get_session)],
-    offset: int = 0,
-    limit: Annotated[int, Query(le=100)] = 100,
-) -> list[Movies]:
-    movies = session.exec(select(Movies).offset(offset).limit(limit)).all()
-    return list(movies)
+    session: Session = Depends(get_session),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=100),
+):
+    movies = session.exec(select(MovieRead).offset(offset).limit(limit)).all()
+    return {"movies": movies}

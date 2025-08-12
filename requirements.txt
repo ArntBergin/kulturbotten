@@ -1,9 +1,5 @@
-beautifulsoup4>=4.12.2
 requests>=2.31.0
 playwright
 fastapi[standard]
-sqlalchemy>=2.0
 sqlmodel
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
 psycopg2-binary>=2.9.9
