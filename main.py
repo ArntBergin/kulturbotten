@@ -3,6 +3,7 @@ from fastapi import Depends, FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from starlette.responses import FileResponse
+from datetime import datetime
 
 import os
 import logging
@@ -67,6 +68,18 @@ def read_movies(
     if limit:
         query = query.limit(limit)
     movies = session.exec(query).all()
+    return {"movies": movies}
+
+@app.get("/movies/today", response_model=dict[str, List[MovieRead]])
+def read_movies_today(
+    date: Optional[str] = Query(None),
+    description="Today's movies",
+    session: Session = Depends(get_session)
+):
+    query_date = date or datetime.today().isoformat()
+    movies = session.exec(
+        select(MovieRead).where(MovieRead.date == query_date)
+    ).all()
     return {"movies": movies}
 
 
