@@ -78,7 +78,7 @@ def read_movies_today(
 ):
     query_date = date or datetime.today().isoformat()
     movies = session.exec(
-        select(MovieRead).where(MovieRead.date == query_date)
+        select(MovieRead).where(MovieRead.date == query_date).order_by(MovieRead.start_time)
     ).all()
     return {"movies": movies}
 
@@ -90,7 +90,7 @@ def read_movies_by_date(
     session: Session = Depends(get_session)
 ):
     movies = session.exec(
-        select(MovieRead).where(MovieRead.date.startswith(date))
+        select(MovieRead).where(MovieRead.date.startswith(date)).order_by(MovieRead.start_time)
     ).all()
     return {"movies": movies}
 
@@ -101,7 +101,7 @@ def read_movies_by_year(
     session: Session = Depends(get_session)
 ):
     movies = session.exec(
-        select(MovieRead).where(MovieRead.date.startswith(year))
+        select(MovieRead).where(MovieRead.date.startswith(year)).order_by(MovieRead.date).order_by(MovieRead.start_time)
     ).all()
     return {"movies": movies}
 
