@@ -9,3 +9,4 @@ tests/
 culture.db
 posters/*
 .env
+scripts/

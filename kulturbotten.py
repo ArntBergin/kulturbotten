@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, create_engine, Session
+from sqlmodel import SQLModel, Field, create_engine, Session, select
 from datetime import date
 from playwright.sync_api import sync_playwright
 
@@ -84,13 +84,27 @@ def parse_day_with_playwright(session: Session, page, day):
                     image_response = page.request.get(url_start)
                     with open(filename, "wb") as f:
                         f.write(image_response.body())
-                    print(f" 📸 Lagret bilde: {filename}")
+                    print(f" Lagret bilde: {filename}")
                 else:
-                    print(f" 🔁 Bilde finnes allerede: {filename}")
+                    print(f" Bilde finnes allerede: {filename}")
 
 
             imdb = ""
 
+            # Sjekk om filmen allerede finnes
+            existing = session.exec(
+                select(Movies).where(
+                    Movies.title == title,
+                    Movies.date == str(date_parsed),
+                    Movies.start_time == start_time
+                )
+            ).first()
+
+            if existing:
+                print(f" Hopper over duplikat: {title} {start_time}")
+                continue
+
+            # Hvis ikke, lagre filmen
             movie = Movies(
                 date=str(date_parsed),
                 start_time=start_time,
