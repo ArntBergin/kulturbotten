@@ -75,7 +75,7 @@ def read_movies_today(
     date: Optional[str] = Query(None, description="Today's movies"),
     session: Session = Depends(get_session)
 ):
-    query_date = date or datetime.today().date().isoformat()
+    query_date = datetime.today().date().isoformat()
     movies = session.exec(
         select(MovieRead).where(MovieRead.date == query_date).order_by(MovieRead.start_time)
     ).all()
