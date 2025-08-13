@@ -21,7 +21,7 @@ engine = create_engine(DATABASE_URL, echo=True)
 class MovieRead(SQLModel, table=True):
     __tablename__ = "movies"  # type: ignore
     guid: Optional[str] = Field(default=None, primary_key=True)
-    date: str
+    date: str = Field(index=True)
     start_time: str
     title: str = Field(index=True)
     age: str
@@ -59,12 +59,11 @@ app.mount("/posters", StaticFiles(directory="/app/posters"), name="posters")
 
 @app.get("/movies/", response_model=dict[str, List[MovieRead]])
 def read_movies(
-    description="Get list of movies, ascending by date",
     session: Session = Depends(get_session),
     offset: int = Query(0, ge=0),
     limit: Optional[int] = Query(None, ge=1)
 ):
-    query = select(MovieRead).offset(offset)
+    query = select(MovieRead).order_by(MovieRead.date).offset(offset)
     if limit:
         query = query.limit(limit)
     movies = session.exec(query).all()
