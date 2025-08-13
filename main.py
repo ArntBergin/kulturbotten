@@ -59,9 +59,36 @@ app.mount("/posters", StaticFiles(directory="/app/posters"), name="posters")
 
 @app.get("/movies/", response_model=dict[str, List[MovieRead]])
 def read_movies(
+    description="Get list of movies, ascending by date",
     session: Session = Depends(get_session),
     offset: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
+    limit: Optional[int] = Query(None, ge=1)
 ):
-    movies = session.exec(select(MovieRead).offset(offset).limit(limit)).all()
+    query = select(MovieRead).offset(offset)
+    if limit:
+        query = query.limit(limit)
+    movies = session.exec(query).all()
     return {"movies": movies}
+
+
+@app.get("/movies/by_date", response_model=dict[str, List[MovieRead]])
+def read_movies_by_date(
+    date: str = Query(..., min_length=10, max_length=10), description="Date in format YYYY-MM-DD",
+    session: Session = Depends(get_session)
+):
+    movies = session.exec(
+        select(MovieRead).where(MovieRead.date.startswith(date))
+    ).all()
+    return {"movies": movies}
+
+
+@app.get("/movies/by_year", response_model=dict[str, List[MovieRead]])
+def read_movies_by_year(
+    year: str = Query(..., min_length=4, max_length=4), description="Years in format YYYY",
+    session: Session = Depends(get_session)
+):
+    movies = session.exec(
+        select(MovieRead).where(MovieRead.date.startswith(year))
+    ).all()
+    return {"movies": movies}
+

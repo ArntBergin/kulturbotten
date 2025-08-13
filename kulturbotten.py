@@ -2,6 +2,8 @@ from sqlmodel import SQLModel, Field, create_engine, Session, select
 from datetime import date
 from playwright.sync_api import sync_playwright
 
+
+import subprocess
 import os
 import uuid
 import time
@@ -187,3 +189,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Når kulturbotten er ferdig:
+subprocess.run(["python", "get_imdb.py"])
