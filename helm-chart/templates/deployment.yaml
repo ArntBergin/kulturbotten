@@ -36,4 +36,4 @@ spec:
               value: {{ .Values.env.DATABASE_URL | quote }}
           volumeMounts:
             - name: posters-storage
-              mountPath: {{ .Values.persistence.mountPath }}
+              mountPath: {{ .Values.persistence.mountPath | default "/app/posters" }}
