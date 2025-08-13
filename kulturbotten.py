@@ -67,20 +67,29 @@ def parse_day_with_playwright(session: Session, page, day):
             screen_scrape = item.locator("div.ticket-title").first.inner_text()
             screen = [s.strip() for s in screen_scrape.split("|")]
 
-            # Poster/filer håndtering (kan tilpasses)
-            filename = ""
+            # ===  filnavn-variabler ===
+
+            filename_url = ""
+            filename_local = ""
+
+            # === Hent attributt fra posterelementet ===
             poster = item.locator("a.event-poster").first.get_attribute("style")
 
+            # === Sjekk inneholder en bilde-URL ===
             if poster and "url(" in poster:
-                # Hent ut URL mellom 'url("' og '")'
+                # Hent ut selve URL
                 url_start = poster.split('url("')[1].split('")')[0].split("?")[0]
 
-                # Lag trygt filnavn
+                # Lag et trygt filnavn basert på tittelen
                 safe_title = "".join(c if c.isalnum() else "_" for c in title.strip())
+
+                # Lokal sti for lagring på disk
                 filename_local = f"/app/posters/{safe_title}.jpg"
+
+                # URL-sti som brukes i API og Home Assistant
                 filename_url = f"posters/{safe_title}.jpg"
 
-                # Last ned bilde
+                # === Last ned bilde hvis det ikke finnes fra før ===
                 if not os.path.exists(filename_local):
                     image_response = page.request.get(url_start)
                     with open(filename_local, "wb") as f:
@@ -115,7 +124,7 @@ def parse_day_with_playwright(session: Session, page, day):
                 info=info,
                 length=length,
                 screen=screen[1] if len(screen) > 1 else "",
-                filename=filename or "",
+                filename=filename_url,
                 imdb=imdb
             )
             print("Klargjør for lagring:", movie.dict())
