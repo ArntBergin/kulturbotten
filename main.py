@@ -72,15 +72,15 @@ def read_movies(
 
 @app.get("/movies/today", response_model=dict[str, List[MovieRead]])
 def read_movies_today(
-    date: Optional[str] = Query(None),
-    description="Today's movies",
+    date: Optional[str] = Query(None, description="Today's movies"),
     session: Session = Depends(get_session)
 ):
-    query_date = date or datetime.today().isoformat()
+    query_date = date or datetime.today().date().isoformat()
     movies = session.exec(
         select(MovieRead).where(MovieRead.date == query_date).order_by(MovieRead.start_time)
     ).all()
     return {"movies": movies}
+
 
 
 
