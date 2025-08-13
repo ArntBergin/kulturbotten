@@ -75,18 +75,20 @@ def parse_day_with_playwright(session: Session, page, day):
                 # Hent ut URL mellom 'url("' og '")'
                 url_start = poster.split('url("')[1].split('")')[0].split("?")[0]
 
-                # Lag trygt filnavn med kun gyldige tegn
+                # Lag trygt filnavn
                 safe_title = "".join(c if c.isalnum() else "_" for c in title.strip())
-                filename = f"/app/posters/{safe_title}.jpg"
+                filename_local = f"/app/posters/{safe_title}.jpg"
+                filename_url = f"posters/{safe_title}.jpg"
 
-                # Last ned med Playwright
-                if not os.path.exists(filename):
+                # Last ned bilde
+                if not os.path.exists(filename_local):
                     image_response = page.request.get(url_start)
-                    with open(filename, "wb") as f:
+                    with open(filename_local, "wb") as f:
                         f.write(image_response.body())
-                    print(f" Lagret bilde: {filename}")
+                    print(f"📸 Lagret bilde: {filename_local}")
                 else:
-                    print(f" Bilde finnes allerede: {filename}")
+                    print(f"🔁 Bilde finnes allerede: {filename_local}")
+
 
 
             imdb = ""
