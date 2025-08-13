@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ include "kulturbotten.fullname" . }}-scraper
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kulturbotten.labels" . | nindent 4 }}
 spec:
@@ -25,4 +26,11 @@ spec:
               env:
                 - name: DATABASE_URL
                   value: {{ .Values.env.DATABASE_URL | quote }}
+              volumeMounts:
+                - name: posters-storage
+                  mountPath: {{ .Values.persistence.mountPath | default "/app/posters" }}
+          volumes:
+            - name: posters-storage
+              persistentVolumeClaim:
+                claimName: {{ include "kulturbotten.fullname" . }}-posters
 {{- end }}
