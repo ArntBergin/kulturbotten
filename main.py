@@ -56,7 +56,7 @@ def on_startup():
 
 app.mount("/posters", StaticFiles(directory="/app/posters"), name="posters")
 
-
+#Sortere først etter date, deretter start_time
 @app.get("/movies/", response_model=dict[str, List[MovieRead]])
 def read_movies(
     session: Session = Depends(get_session),
