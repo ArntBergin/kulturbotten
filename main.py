@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import Depends, FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-
+from starlette.responses import FileResponse
 
 import os
 import logging
@@ -63,11 +63,12 @@ def read_movies(
     offset: int = Query(0, ge=0),
     limit: Optional[int] = Query(None, ge=1)
 ):
-    query = select(MovieRead).order_by(MovieRead.date).offset(offset)
+    query = select(MovieRead).order_by(MovieRead.date, MovieRead.start_time).offset(offset)
     if limit:
         query = query.limit(limit)
     movies = session.exec(query).all()
     return {"movies": movies}
+
 
 
 @app.get("/movies/by_date", response_model=dict[str, List[MovieRead]])
