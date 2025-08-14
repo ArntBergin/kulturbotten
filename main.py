@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import Depends, FastAPI, Query
 from fastapi.staticfiles import StaticFiles
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Field, Session, SQLModel, create_engine, select, desc
 from starlette.responses import FileResponse
 from datetime import datetime
 
@@ -17,6 +17,7 @@ if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL må settes")
 engine = create_engine(DATABASE_URL, echo=True)
 
+sort_desc: bool = Query(False, description="Sort descending by date and start_time")
 
 # === MODELLER ===
 class MovieRead(SQLModel, table=True):
@@ -55,53 +56,71 @@ def on_startup():
 
 # === ENDEPUNKTER ===
 
+
+
 app.mount("/posters", StaticFiles(directory="/app/posters"), name="posters")
 
-#Sortere først etter date, deretter start_time
+
 @app.get("/movies/", response_model=dict[str, List[MovieRead]])
 def read_movies(
     session: Session = Depends(get_session),
     offset: int = Query(0, ge=0),
-    limit: Optional[int] = Query(None, ge=1)
+    limit: Optional[int] = Query(None, ge=1),
+    sort_desc: bool = Query(False, description="Sort descending by date and start_time")
 ):
-    query = select(MovieRead).order_by(MovieRead.date, MovieRead.start_time).offset(offset)
+    if sort_desc:
+        query = select(MovieRead).order_by(desc(MovieRead.date), desc(MovieRead.start_time))
+    else:
+        query = select(MovieRead).order_by(MovieRead.date, MovieRead.start_time)
+
+    query = query.offset(offset)
     if limit:
         query = query.limit(limit)
+
     movies = session.exec(query).all()
     return {"movies": movies}
 
+
 @app.get("/movies/today", response_model=dict[str, List[MovieRead]])
 def read_movies_today(
-    date: Optional[str] = Query(None, description="Today's movies"),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    sort_desc: bool = Query(False, description="Sort descending by start_time")
 ):
     query_date = datetime.today().date().isoformat()
-    movies = session.exec(
-        select(MovieRead).where(MovieRead.date == query_date).order_by(MovieRead.start_time)
-    ).all()
+    if sort_desc:
+        query = select(MovieRead).where(MovieRead.date == query_date).order_by(desc(MovieRead.start_time))
+    else:
+        query = select(MovieRead).where(MovieRead.date == query_date).order_by(MovieRead.start_time)
+
+    movies = session.exec(query).all()
     return {"movies": movies}
-
-
 
 
 @app.get("/movies/by_date", response_model=dict[str, List[MovieRead]])
 def read_movies_by_date(
-    date: str = Query(..., min_length=10, max_length=10), description="Date in format YYYY-MM-DD",
-    session: Session = Depends(get_session)
+    date: str = Query(..., min_length=10, max_length=10, description="Date in format YYYY-MM-DD"),
+    session: Session = Depends(get_session),
+    sort_desc: bool = Query(False, description="Sort descending by start_time")
 ):
-    movies = session.exec(
-        select(MovieRead).where(MovieRead.date.startswith(date)).order_by(MovieRead.start_time)
-    ).all()
+    if sort_desc:
+        query = select(MovieRead).where(MovieRead.date.startswith(date)).order_by(desc(MovieRead.start_time))
+    else:
+        query = select(MovieRead).where(MovieRead.date.startswith(date)).order_by(MovieRead.start_time)
+
+    movies = session.exec(query).all()
     return {"movies": movies}
 
 
 @app.get("/movies/by_year", response_model=dict[str, List[MovieRead]])
 def read_movies_by_year(
-    year: str = Query(..., min_length=4, max_length=4), description="Years in format YYYY",
-    session: Session = Depends(get_session)
+    year: str = Query(..., min_length=4, max_length=4, description="Years in format YYYY"),
+    session: Session = Depends(get_session),
+    sort_desc: bool = Query(False, description="Sort descending by date and start_time")
 ):
-    movies = session.exec(
-        select(MovieRead).where(MovieRead.date.startswith(year)).order_by(MovieRead.date).order_by(MovieRead.start_time)
-    ).all()
-    return {"movies": movies}
+    if sort_desc:
+        query = select(MovieRead).where(MovieRead.date.startswith(year)).order_by(desc(MovieRead.date), desc(MovieRead.start_time))
+    else:
+        query = select(MovieRead).where(MovieRead.date.startswith(year)).order_by(MovieRead.date, MovieRead.start_time)
 
+    movies = session.exec(query).all()
+    return {"movies": movies}
