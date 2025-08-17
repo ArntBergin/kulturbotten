@@ -1,12 +1,10 @@
-from sqlmodel import SQLModel, Field, create_engine, Session, select
+from sqlmodel import SQLModel, Field, create_engine, Session, select, and_
 from datetime import date
 from playwright.sync_api import sync_playwright
 
 
-import subprocess
-import os
-import uuid
-import time
+import subprocess, sys, os, uuid, time
+
 
 # === Database URL fra miljøvariabel ===
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -18,7 +16,7 @@ engine = create_engine(DATABASE_URL, echo=True)
 # === Modell definisjon (samme som i API) ===
 class Movies(SQLModel, table=True):
     guid: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    date: str
+    movie_date: date = Field(index=True)
     start_time: str
     title: str
     age: str
@@ -46,7 +44,7 @@ def parse_norsk_dato(date_str: str) -> date:
     year = date.today().year
     return date(year, month, day_num)
 
-# Hoved scraping-funksjon, som lagrer i DB
+# Hoved Kino scraping-funksjon, som lagrer i DB
 def parse_day_with_playwright(session: Session, page, day):
     events = page.locator(".event").all()
     print(f" [{day}] fant {len(events)} event(s)")
@@ -107,9 +105,9 @@ def parse_day_with_playwright(session: Session, page, day):
             # Sjekk om filmen allerede finnes
             existing = session.exec(
                 select(Movies).where(
-                    Movies.title == title,
-                    Movies.date == str(date_parsed),
-                    Movies.start_time == start_time
+                    (Movies.title == title) &
+                    (Movies.movie_date == date_parsed) &
+                    (Movies.start_time == start_time)
                 )
             ).first()
 
@@ -119,7 +117,7 @@ def parse_day_with_playwright(session: Session, page, day):
 
             # Hvis ikke, lagre filmen
             movie = Movies(
-                date=str(date_parsed),
+                movie_date=date_parsed,
                 start_time=start_time,
                 title=title,
                 age=age,
@@ -192,4 +190,4 @@ if __name__ == "__main__":
 
 
 # Når kulturbotten er ferdig:
-subprocess.run(["python", "get_imdb.py"])
+subprocess.run([sys.executable, "get_imdb.py"])
