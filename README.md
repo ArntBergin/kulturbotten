@@ -1,4 +1,3 @@
-@"
 # 🎬 Kulturbotten
 
 **Kulturbotten** er en Python-app som samler kinoprogrammer fra N amsos kino og filmdata fra IMDb. Den gjør det enkelt å:  
