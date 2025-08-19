@@ -3,3 +3,4 @@ playwright
 fastapi[standard]
 sqlmodel
 psycopg2-binary>=2.9.9
+pillow
