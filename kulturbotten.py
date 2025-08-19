@@ -99,7 +99,7 @@ def parse_day_with_playwright(session: Session, page, day):
                 filename_thumbnail = f"/posters/{safe_title}_thumbnail.jpg"
 
                 # URL-sti som brukes i API og Home Assistant
-                filename_url = f"posters/{safe_title}.jpg"
+                filename_url = f"/posters/{safe_title}.jpg"
 
                 # === Last ned bilde hvis det ikke finnes fra før ===
                 if not os.path.exists(filename_local):
