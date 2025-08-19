@@ -72,7 +72,7 @@ def read_movies(
     all: bool = Query(False, description="Default only see current movies")
 ):
 
-    today = datetime.today().date
+    today = datetime.today().date()
 
     if all:
         # Hent alle filmer
