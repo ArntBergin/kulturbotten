@@ -1,12 +1,11 @@
-from sqlmodel import SQLModel, Field, create_engine, Session, select
+from sqlmodel import SQLModel, Field, create_engine, Session, select, and_
 from datetime import date
 from playwright.sync_api import sync_playwright
+from PIL import Image
 
 
-import subprocess
-import os
-import uuid
-import time
+import subprocess, sys, os, uuid, time, glob
+
 
 # === Database URL fra miljøvariabel ===
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -18,7 +17,7 @@ engine = create_engine(DATABASE_URL, echo=True)
 # === Modell definisjon (samme som i API) ===
 class Movies(SQLModel, table=True):
     guid: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    date: str
+    movie_date: date = Field(index=True)
     start_time: str
     title: str
     age: str
@@ -26,7 +25,11 @@ class Movies(SQLModel, table=True):
     length: str
     screen: str
     filename: str
-    imdb: str
+    thumbnail: str
+    imdb_rating: str
+    imdb_orgtitle: str
+    imdb_id: str
+
 
 # Opprett tabeller hvis de ikke finnes
 def create_tables():
@@ -46,7 +49,7 @@ def parse_norsk_dato(date_str: str) -> date:
     year = date.today().year
     return date(year, month, day_num)
 
-# Hoved scraping-funksjon, som lagrer i DB
+# Hoved Kino scraping-funksjon, som lagrer i DB
 def parse_day_with_playwright(session: Session, page, day):
     events = page.locator(".event").all()
     print(f" [{day}] fant {len(events)} event(s)")
@@ -69,24 +72,31 @@ def parse_day_with_playwright(session: Session, page, day):
             screen_scrape = item.locator("div.ticket-title").first.inner_text()
             screen = [s.strip() for s in screen_scrape.split("|")]
 
-            # ===  filnavn-variabler ===
+            # ===  fil-variabler ===
 
             filename_url = ""
             filename_local = ""
+            filename_thumbnail = ""
+            size = 278, 414
 
             # === Hent attributt fra posterelementet ===
             poster = item.locator("a.event-poster").first.get_attribute("style")
-
+            
             # === Sjekk inneholder en bilde-URL ===
             if poster and "url(" in poster:
                 # Hent ut selve URL
                 url_start = poster.split('url("')[1].split('")')[0].split("?")[0]
 
+                # Oprettet postersmappe
+                os.makedirs("/posters", exist_ok=True)
+
                 # Lag et trygt filnavn basert på tittelen
                 safe_title = "".join(c if c.isalnum() else "_" for c in title.strip())
+   
 
                 # Lokal sti for lagring på disk
-                filename_local = f"/app/posters/{safe_title}.jpg"
+                filename_local = f"/posters/{safe_title}.jpg"
+                filename_thumbnail = f"/posters/{safe_title}_thumbnail.jpg"
 
                 # URL-sti som brukes i API og Home Assistant
                 filename_url = f"posters/{safe_title}.jpg"
@@ -96,20 +106,33 @@ def parse_day_with_playwright(session: Session, page, day):
                     image_response = page.request.get(url_start)
                     with open(filename_local, "wb") as f:
                         f.write(image_response.body())
-                    print(f"📸 Lagret bilde: {filename_local}")
+                    print(f" Lagret bilde: {filename_local}")
                 else:
-                    print(f"🔁 Bilde finnes allerede: {filename_local}")
+                    print(f" Bilde finnes allerede: {filename_local}")
+
+                # === Lag thumbnail av filename_local om det ikke finnes fra før ===
+                if not os.path.exists(filename_thumbnail):
+                    try:
+                        with Image.open(filename_local) as im:
+                            im.thumbnail(size)
+                            im.save(filename_thumbnail, "JPEG")
+                        print(f"Laget thumbnail: {filename_thumbnail}")
+                    except Exception as e:
+                        print(f"Klarte ikke lage thumbnail: {e}")
 
 
 
-            imdb = ""
+            imdb_rating = ""
+            imdb_orgtitle = ""
+            imdb_id = ""
+
 
             # Sjekk om filmen allerede finnes
             existing = session.exec(
                 select(Movies).where(
-                    Movies.title == title,
-                    Movies.date == str(date_parsed),
-                    Movies.start_time == start_time
+                    (Movies.title == title) &
+                    (Movies.movie_date == date_parsed) &
+                    (Movies.start_time == start_time)
                 )
             ).first()
 
@@ -119,7 +142,7 @@ def parse_day_with_playwright(session: Session, page, day):
 
             # Hvis ikke, lagre filmen
             movie = Movies(
-                date=str(date_parsed),
+                movie_date=date_parsed,
                 start_time=start_time,
                 title=title,
                 age=age,
@@ -127,7 +150,10 @@ def parse_day_with_playwright(session: Session, page, day):
                 length=length,
                 screen=screen[1] if len(screen) > 1 else "",
                 filename=filename_url,
-                imdb=imdb
+                imdb_rating=imdb_rating,
+                imdb_orgtitle=imdb_orgtitle,
+                imdb_id=imdb_id,
+                thumbnail=filename_thumbnail
             )
             print("Klargjør for lagring:", movie.dict())
             session.add(movie)
@@ -192,4 +218,4 @@ if __name__ == "__main__":
 
 
 # Når kulturbotten er ferdig:
-subprocess.run(["python", "get_imdb.py"])
+subprocess.run([sys.executable, "get_imdb.py"])

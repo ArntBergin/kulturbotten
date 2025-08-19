@@ -1,86 +1,88 @@
 from sqlmodel import SQLModel, Field, Session, create_engine, select
-import requests, datetime, os, time
-
+from datetime import date
+import datetime, requests, os, time
 
 
 class Movies(SQLModel, table=True):
     guid: str = Field(primary_key=True)
     title: str
-    date: str
+    movie_date: date = Field(index=True)
     start_time: str
     age: str
     info: str
     length: str
     screen: str
     filename: str
-    imdb: str  
+    thumbnail: str
+    imdb_rating: str
+    imdb_orgtitle: str
+    imdb_id: str
 
-#  DB fra env
+
+# DB fra env
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL må settes som miljøvariabel")
 
 engine = create_engine(DATABASE_URL)
 
+
 # Søk etter tittel i IMDb API
-def get_first_allowed_title(title):
+def get_first_allowed_title(title: str):
     url = f"https://api.imdbapi.dev/search/titles?query={title}"
     response = requests.get(url)
 
-    if response.status_code == 200:
-        title_data = response.json()
-        current_year = datetime.datetime.now().year
-        allowed_years = {current_year, current_year - 1}
-
-        # Returner første treff med gyldig årstall
-        for item in title_data.get("titles", []):
-            if item.get("startYear") in allowed_years:
-                return item
-        return None
-    else:
+    if response.status_code != 200:
         print(f"Feil ved henting fra IMDb API. Statuskode: {response.status_code}")
         return None
 
-### Oppdater alle filmer med rating eller marker som NOT_FOUND 
+    title_data = response.json()
+    current_year = datetime.date.today().year
+    allowed_years = {current_year, current_year - 1}
+
+    for item in title_data.get("titles", []):
+        if item.get("startYear") in allowed_years:
+            return item
+    return None
+
+
+# Oppdater filmer
 with Session(engine) as session:
-    # Hent alle filmer fra databasen
     all_movies = session.exec(select(Movies)).all()
 
-    # Lag en liste over unike titler som mangler IMDb-rating
-    unique_titles = set(
-        movie.title for movie in all_movies
-        if movie.imdb not in {"NOT_FOUND"} and (not movie.imdb or movie.imdb.strip() == "")
-    )
+    # Finn unike titler uten rating og komplettere med rating, orgtitle og id
+    unique_titles = {
+        m.title for m in all_movies
+        if not m.imdb_rating or m.imdb_rating.strip() == "" or m.imdb_rating == "NOT_FOUND"
+    }
 
-    # Gå gjennom hver tittel og hent rating fra API
     for title in unique_titles:
         result = get_first_allowed_title(title)
-        time.sleep(1.5) # Unngå 429 timeout feil
+        time.sleep(1.5)  # throttle
 
         if result:
-            rating = result.get("rating", {}).get("aggregateRating")
-            if rating:
-                updated = 0
-                for movie in all_movies:
-                    if movie.title == title:
-                        movie.imdb = str(rating)
-                        session.add(movie)
-                        updated += 1
-                session.commit()
-                print(f"Oppdatert {updated} filmer med tittel '{title}' → rating: {rating}")
-            else:
-                # Ingen rating funnet – marker som NOT_FOUND
-                print(f"Ingen rating funnet for '{title}' – markerer som NOT_FOUND")
-                for movie in all_movies:
-                    if movie.title == title:
-                        movie.imdb = "NOT_FOUND"
-                        session.add(movie)
-                session.commit()
+            imdb_rating = result.get("rating", {}).get("aggregateRating") or "NOT_FOUND"
+            imdb_orgtitle   = result.get("originalTitle") or "NOT_FOUND"
+            imdb_id     = result.get("id") or "NOT_FOUND"
         else:
-            # API-feil eller ingen treff – marker som NOT_FOUND
-            print(f"Fant ikke IMDb-data for '{title}' – markerer som NOT_FOUND")
-            for movie in all_movies:
-                if movie.title == title:
-                    movie.imdb = "NOT_FOUND"
-                    session.add(movie)
-            session.commit()
+            imdb_rating = "NOT_FOUND"
+            imdb_orgtitle   = "NOT_FOUND"
+            imdb_id     = "NOT_FOUND"
+
+        updated = 0
+        for movie in all_movies:
+            if movie.title == title:
+                movie.imdb_rating = str(imdb_rating)
+                movie.imdb_orgtitle = imdb_orgtitle
+                movie.imdb_id = imdb_id
+                session.add(movie)
+                updated += 1
+
+        session.commit()
+        print(
+            f"Oppdatert {updated} filmer med '{title}' → "
+            f"rating={imdb_rating}, orgtitle={imdb_orgtitle}, id={imdb_id}"
+        )
+
+        session.commit()
+        print(f"Oppdatert {updated} filmer med tittel '{title}' → '{imdb_rating}' og '{imdb_id}'")
