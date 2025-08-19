@@ -30,7 +30,10 @@ class MovieRead(SQLModel, table=True):
     length: str
     screen: str
     filename: str
-    imdb: str
+    thumbnail: str
+    imdb_rating: str
+    imdb_orgtitle: str
+    imdb_id: str
 
 
 # === HJELPEFUNKSJONER ===
@@ -56,8 +59,8 @@ def on_startup():
 # === ENDEPUNKTER ===
 
 
-os.makedirs("/app/posters", exist_ok=True)
-app.mount("/posters", StaticFiles(directory="/app/posters"), name="posters")
+os.makedirs("/posters", exist_ok=True)
+app.mount("/posters", StaticFiles(directory="/posters"), name="posters")
 
 
 @app.get("/movies/", response_model=dict[str, List[MovieRead]])
@@ -65,13 +68,26 @@ def read_movies(
     session: Session = Depends(get_session),
     offset: int = Query(0, ge=0),
     limit: Optional[int] = Query(None, ge=1),
-    sort_desc: bool = Query(False, description="Sort descending by date and start_time")
+    sort_desc: bool = Query(False, description="Sort descending by date and start_time"),
+    all: bool = Query(False, description="Default only see current movies")
 ):
+
+    today = datetime.today().date
+
+    if all:
+        # Hent alle filmer
+        query = select(MovieRead)
+    else:
+        #Bare hent dagens dato og fremover
+        query = select(MovieRead).where(MovieRead.movie_date >= today) # type: ignore
+     
+    #Sortere
     if sort_desc:
-        query = select(MovieRead).order_by(desc(MovieRead.movie_date), desc(MovieRead.start_time))
+        query = select(MovieRead).order_by(desc(MovieRead.movie_date), desc(MovieRead.start_time)) 
     else:
         query = select(MovieRead).order_by(MovieRead.movie_date, MovieRead.start_time) # type: ignore
 
+    #offset / limit
     query = query.offset(offset)
     if limit:
         query = query.limit(limit)
