@@ -1,6 +1,6 @@
 # 🎬 Kulturbotten
 
-**Kulturbotten** er en Python-app som samler kinoprogrammer fra N amsos kino og filmdata fra IMDb. Den gjør det enkelt å:  
+**Kulturbotten** er en Python-app som samler kinoprogrammer fra Namsos kino og filmdata fra IMDb. Den gjør det enkelt å:  
 
 - 📅 Se hvilke filmer som går på kino i dag eller en spesifikk dato  
 - ⭐ Hente IMDb-rating, originaltittel og IMDb-ID for filmene  
