@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/arntbergin/kulturbotten
-  tag: 1.5           
+  tag: 2.0           
   pullPolicy: Always
 
 env:
@@ -23,7 +23,7 @@ persistence:
   enabled: true
   accessMode: ReadWriteOnce
   size: 10Gi
-  mountPath: /app/posters
+  mountPath: /posters
   storageClass: longhorn  # eller den som passer ditt cluster
 
 cronjob:
