@@ -83,9 +83,9 @@ def read_movies(
      
     #Sortere
     if sort_desc:
-        query = select(MovieRead).order_by(desc(MovieRead.movie_date), desc(MovieRead.start_time)) 
+        query = query.order_by(desc(MovieRead.movie_date), desc(MovieRead.start_time)) 
     else:
-        query = select(MovieRead).order_by(MovieRead.movie_date, MovieRead.start_time) # type: ignore
+        query = query.order_by(MovieRead.movie_date, MovieRead.start_time) # type: ignore
 
     #offset / limit
     query = query.offset(offset)
